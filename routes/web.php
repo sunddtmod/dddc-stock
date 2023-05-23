@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\frontendController as fe;
+use App\Http\Controllers\backendController as be;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,5 +16,10 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    Route("home");
+});
+Route::get('/home', [fe::class, 'home'])->name('home');
+
+Route::group(['middleware' => 'keycloak-web'], function () {
+
 });
