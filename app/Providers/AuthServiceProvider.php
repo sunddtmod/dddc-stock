@@ -26,32 +26,34 @@ class AuthServiceProvider extends ServiceProvider
      * @return void
      */
 
-    private function putSession($user) {
+     private function putSession($user) {
         if (empty(Session::get('role'))) {
             $cid = trim($user->preferred_username);
-            $data = DB::table('users')->where('cid', $cid)->first();
+            $data = DB::table('users')->where('id', $cid)->first();
             if( empty($data) ) {
                 $sso = new SSOController();
                 $sso = $sso->ProfileData($cid);
-                $fname = $sso['fname'];
                 $user_name = $sso['user_name'];
-                $dep_id = $sso['dep_id'];
-                $email = $sso['email'];
                 $role = "viwer";
+
+                $role_parcel = 0;
+                $role_report = 0;
+                $role_setting = 0;
             }else{
-                $fname = $data->fname;
                 $user_name = $data->name;
-                $dep_id = $data->dep_id;
-                $email = $data->email;
-                $role = $data->role;
+                $role = "admin";
+
+                $role_parcel = $data->role_parcel;
+                $role_report = $data->role_report;
+                $role_setting = $data->role_setting;
             }
 
             session()->put('cid', $cid);
-            session()->put('fname', $fname);
             session()->put('user_name', $user_name);
-            session()->put('dep_id', $dep_id);
-            session()->put('email', $email);
             session()->put('role', $role);
+            session()->put('role_parcel', $role_parcel);
+            session()->put('role_report', $role_report);
+            session()->put('role_setting', $role_setting);
 
             return $role;
         }else{
@@ -63,41 +65,31 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        Gate::define('admin', function ($user) {
+        Gate::define('parcel', function ($user) {
             $val = $this->putSession($user);
-            if ($val === 'admin') {
+            if ( Session::get('role_parcel') == 1) {
                 return true;
             }else{
                 return false;
             }
         });
 
-        Gate::define('examiner', function ($user) {
+        Gate::define('report', function ($user) {
             $val = $this->putSession($user);
-            if ($val === 'examiner') {
+            if ( Session::get('role_report') == 1) {
                 return true;
             }else{
                 return false;
             }
         });
 
-        Gate::define('user', function ($user) {
+        Gate::define('setting', function ($user) {
             $val = $this->putSession($user);
-            if ($val === 'user') {
+            if ( Session::get('role_setting') == 1) {
                 return true;
             }else{
                 return false;
             }
         });
-
-        Gate::define('viwer', function ($user) {
-            $val = $this->putSession($user);
-            if ($val === 'viwer') {
-                return true;
-            }else{
-                return false;
-            }
-        });
-
     }
 }

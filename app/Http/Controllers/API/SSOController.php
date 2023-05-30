@@ -28,13 +28,11 @@ class SSOController extends Controller
         $title[5]="ว่าที่ ร.ต.";
         $title[13]="จ่าสิบตรี";
         if (!empty($data)) {
-            $arr['user_id'] = $data['employee_id'];
-            $arr['fname'] = trim($data['fname']);
-            $arr['user_name'] = (empty($title[$data['title_id']]) ? 'คุณ' : $title[$data['title_id']]) . trim($data['fname']) . " " . trim($data['lname']);;
-            $arr['dep_id'] = $data['work_bu1'];
-            $arr['group_id'] = $data['work_bu2'];
-            $arr['tel'] = $data['mobile'];
-            $arr['email'] = $data['email'];
+            if( $data['status_id'] == 1 ) {
+                $arr['user_id'] = $data['employee_id'];
+                $arr['fname'] = trim($data['fname']);
+                $arr['user_name'] = (empty($title[$data['title_id']]) ? 'คุณ' : $title[$data['title_id']]) . trim($data['fname']) . " " . trim($data['lname']);;
+            }
         }
         return $arr;
     }

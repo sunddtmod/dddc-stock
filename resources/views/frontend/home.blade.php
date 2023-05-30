@@ -1,1 +1,92 @@
-<h1>home</h1>
+@extends('layouts.master')
+
+@section('css')
+<style>
+  .cricle-img {
+    border: 6px solid rgba(0, 0, 0, 0.15);
+    margin: 0px auto;
+  }
+  img {
+    object-fit: cover;
+    object-position: center;
+    width: 200px !important;
+    height: 200px !important;
+  }
+  .zoomable {
+    object-fit: fill;
+    object-position: center;
+    width: 100% !important;
+    height: 100% !important;
+  }
+</style>
+@endsection
+
+@section('content')
+<section id="portfolio" class="portfolio section-bg">
+      <div class="container">
+
+        <div class="section-bg">
+            <div class="row">
+                <div class="col-md-8">
+                    <h3 class="ps-3">รายการพัสดุ</h3>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group mb-3">
+                    <input type="text" class="form-control" placeholder="คำค้น" id="key" value="{{$key}}">
+                    <span class="input-group-text" onclick="search()"><i class="bi bi-search"></i></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="py-4">
+            <div class="row" id="area">
+              @if( count($data) > 0 )
+                @foreach( $data as $item )
+                  <?php
+                  if(empty($item->pic)) {
+                    $src=asset('assets/img/blank.png');
+                  }else{
+                    $src=asset('assets/parcel')."/".$item->pic;
+                  }
+                  ?>
+
+                  <div class="col-md-2 portfolio-item filter-app">
+                    <div class="portfolio-wrap">
+                      <span class="cricle-img"><img src="{{$src}}" class="img-fluid" alt=""></span>
+                      <div class="portfolio-links">
+                        <a href="{{$src}}" data-gallery="portfolioGallery" class="portfolio-lightbox" 
+                        title="{{ $item->code }}<br>{{ $item->name }}"><i class="bi bi-plus"></i></a>
+                      </div>
+                      <div align="center">
+                        <h4>{{ number_format($item->balance) }}</h4>
+                        <span>{{ $item->code }}<br>{{ $item->name }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  @endforeach
+                @else
+                  <div class="text-danger fs-1 text-center">ไม่พบข้อมูล</div>
+                @endif
+
+            </div>
+        </div>
+      </div>
+    </section>
+@endsection
+
+@section('js')
+<script>
+  var input = document.getElementById("key");
+  input.addEventListener("keypress", function(event) {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    search();
+  }
+});
+  function search() {
+    let = key = $("#key").val();
+    window.location.href = "{{ Route('home') }}"+"/"+key;
+  }
+</script>
+@endsection

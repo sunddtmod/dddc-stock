@@ -165,7 +165,8 @@ return [
         /*
          * Package Service Providers...
          */
-
+        Pyaesone17\ActiveState\ActiveStateServiceProvider::class,
+        Intervention\Image\ImageServiceProvider::class,
         /*
          * Application Service Providers...
          */
@@ -229,7 +230,8 @@ return [
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
-
+        'Active' => Pyaesone17\ActiveState\ActiveFacade::class,
+        'Image' => Intervention\Image\Facades\Image::class,
     ],
 
 ];

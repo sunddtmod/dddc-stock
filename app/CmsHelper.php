@@ -2,7 +2,6 @@
 
 namespace App;
 use Illuminate\Support\Facades\DB;
-use App\Models\HR_org;
 
 class CmsHelper
 {
@@ -144,83 +143,6 @@ class CmsHelper
         // $pool = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $pool = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         return substr(str_shuffle(str_repeat($pool, 5)), 0, $length);
-    }
-
-    public static function Get_Org_Select($dep_id=0)
-    {
-      $query = HR_org::select('sso', 'dep_name')->orderBy('dep_center')->get();
-      $temp = '';
-      foreach ($query as $data) {
-        $sel = ($dep_id == $data->sso) ? "selected" : "";
-        $temp .= "<option value='" . $data->sso . "' $sel>" . $data->dep_name . "</option>";
-      }
-      return $temp;
-    }
-
-    public static function my_box($clear=0, $created_at)
-    {
-        if( is_null($clear) ) {
-            return "<span class='my-icon bg-danger'>NEW</span>";
-        } 
-        else if($clear == 0) {
-            return "-";
-        }
-        else if($clear == 1) {
-            $atnow = date('Y-m-d');
-            $at15 = date('Y-m-d',strtotime($created_at . " +15 days"));
-            $at30 = date('Y-m-d',strtotime($created_at . " +30 days"));
-            $at60 = date('Y-m-d',strtotime($created_at . " +60 days"));
-            $round_type = '';
-
-            if( $atnow <= $at15 ) {
-                $round_type = "15";
-            }
-            else if( $atnow <= $at30 ){
-                $round_type = "30";
-            }
-            else if( $atnow <= $at60 ){
-                $round_type = "60";
-            }
-            else {
-                $round_type = ">60";
-            }
-            return "<span class='my-icon bg-dark'>".$round_type."</span>";
-        }
-    }
-    public static function my_status($clear=null, $status=0,$nextdate=null, $showdate=false)
-    {
-        $val = '-';
-        if( $status == 0 ) {
-            if( is_null($clear) ) {
-                $val = "<span class='text-danger'><b>1_รอตรวจสอบ</b></span>";
-            }
-            else if($clear==0) {
-                $val = "<span class='text-secondary'>9_ไม่ครบถ้วน</span>";
-            }
-        }
-        else if( $status == 1 ) {
-            $val = "<span class='text-pink2'><b>2_รอตอบกลับ</b></span>";
-            if( $showdate ) {
-                $val .= "<br>".CmsHelper::DateThai($nextdate);
-            }
-        } 
-        else if( $status == 2 ) {
-            if( !is_null($nextdate)) {
-                if( $nextdate <= date("Y-m-d") ) {
-                    $val = "<span class='text-darkorange'><b>3_ความก้าวหน้า</b></span>";
-                    if( $showdate ) {
-                        $val .= "<br>".CmsHelper::DateThai($nextdate);
-                    }
-                }else{
-                    $val = "<span class='text-primary'><b>4_ตอบกลับแล้ว</b></span>";
-                }
-            }
-        }
-        else if( $status == 3 ) {
-        $val = "<span class='text-success'><b>5_ยุติแล้ว</b></span>";
-        }
-
-        return $val;
     }
 }
 
