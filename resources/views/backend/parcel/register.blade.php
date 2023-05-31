@@ -248,8 +248,8 @@ $(function() {
   };
 
   function auto_txt() {
-    let code= $("#parcel_id").val();
-    $("#code").val(code);
+    // let code= $("#parcel_id").val();
+    // $("#code").val(code);
   }
 
   function popup_add() {

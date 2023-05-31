@@ -25,7 +25,7 @@
 <section id="portfolio" class="portfolio section-bg">
       <div class="container">
 
-        <div class="section-bg">
+        <div class="section-bg" data-aos="fade-left">
             <div class="row">
                 <div class="col-md-8">
                     <h3 class="ps-3">รายการพัสดุ</h3>
@@ -66,16 +66,23 @@
                   </div>
                   @endforeach
                 @else
-                  <div class="text-danger fs-1 text-center">ไม่พบข้อมูล</div>
+                  <div class="text-danger fs-1 text-center" data-aos="fade-up">ไม่พบข้อมูล</div>
                 @endif
 
             </div>
         </div>
       </div>
     </section>
+    <svg class="barcode"
+  jsbarcode-format="upc"
+  jsbarcode-value="123456789012"
+  jsbarcode-textmargin="0"
+  jsbarcode-fontoptions="bold">
+</svg>
 @endsection
 
 @section('js')
+<script src="{{asset('assets/js/JsBarcode.all.min.js')}}"></script>
 <script>
   var input = document.getElementById("key");
   input.addEventListener("keypress", function(event) {

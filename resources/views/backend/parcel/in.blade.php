@@ -2,24 +2,103 @@
 
 @section('css')
 <link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap5.min.css">
-<link
-    href="https://cdn.jsdelivr.net/npm/dual-listbox/dist/dual-listbox.css"
-    rel="stylesheet"
-/>
+
+<style>
+    .dual-listbox__available {
+        width: 27vw !important;
+    }
+    @media only screen and (max-width: 600px) {
+        .dual-listbox__available {
+        width: 100vw !important;
+        }
+    }
+
+    th {
+        text-align: center !important;
+    }
+    td .form-control {
+        text-align: right;
+    }
+
+    .sel_chk::before {
+        content: ' \2611';
+        margin-right: 5px;
+    }
+</style>
 @endsection
 
 @section('content')
+<section id="portfolio" class="portfolio section-bg">
 <div class="container">
 
-<select class="select2" multiple>
-    <option value="1">One</option>
-    <option value="2">Two</option>
-    <option value="3">Three</option>
-</select>
+  <div class="section-bg" data-aos="fade-left">
+      <div class="row">
+          <div class="col-md-6">
+              <h3 class="ps-3">รับเข้า</h3>
+          </div>
+          <div class="col-md-3">
+            <div class="input-group mb-3">
+              <span class="input-group-text">เลขที่ใบสั่งซื้อ</span>
+              <input type="text" class="form-control" placeholder="เลขที่ใบสั่งซื้อ" id="code">
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="input-group mb-3">
+              <span class="input-group-text">วันที่ซื้อ</span>
+              <input type="date" class="form-control" placeholder="วันที่ซื้อ" id="purchase_date">
+            </div>
+          </div>
+      </div>
+  </div>
+
+  <div class="py-3" data-aos="fade-up">
+    <div class="mb-2">
+        <div class="row">
+            <div class="col-md-4">
+                <h5 class="p-2 bg-dark text-white">รายการวัสดุ</h5>
+                <select class="form-control"  name="parcel_sel[]" id="parcel_sel" multiple size = 20 onchange="fn_parcel_sel(this)">
+                @foreach( $data as $item )
+                <option value="{{$item->id}}">{{$item->name}}</option>
+                @endforeach
+                </select>
+            </div>
+            <div class="col-md-8">
+                <h5 class="p-2 bg-dark text-white">รายการวัสดุที่เลือก</h5>
+
+                <div class="table-responsive">
+                <table id="myTable" class="table table-bordered table-sm">
+                    <thead class="bg-gradient-blue">
+                        <tr>
+                        <th>รหัส</th>
+                        <th>ชื่อวัสดุ</th>
+                        <th style="width: 60px;">หน่วย</th>
+                        <th style="width: 90px;">จำนวน</th>
+                        <th style="width: 90px;">ราคา (บาท)</th>
+                        <th style="width: 90px;">รวม (บาท)</th>
+                        <th style="width: 60px;">ลบ</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                        <tr>
+                            <td></td><td></td><td></td><td></td>
+                            <td><div align="right">รวม</div></td>
+                            <td><input type='number' step='0.01' class='form-control' readonly id="num_sum_all"></td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+      
+  </div>
 
 
 </div>
-
+</section>
 
 @endsection
 
@@ -30,8 +109,6 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 <script src="{{asset('assets/js/dataTables/jquery.dataTables.min.js')}}"></script>
 <script src="{{asset('assets/js/dataTables/dataTables.bootstrap5.min.js')}}"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/dual-listbox/dist/dual-listbox.min.js"></script>
 
 @if(session()->has('Success'))
 <script>
@@ -55,8 +132,13 @@
 @endif
 
 <script>
+var obj_data = <?=json_encode($data, JSON_UNESCAPED_UNICODE)?>;
+var row_data = [];
+var tb;
+var counter = 1;
+
 $(function() {
-    $("#myTable").DataTable({
+    tb = $("#myTable").DataTable({
       "language": {
             "lengthMenu": "แสดง _MENU_ ข้อมูล/หน้า",
             "zeroRecords": "ไม่มีข้อมูล",
@@ -67,22 +149,89 @@ $(function() {
     });
   });
 
+  $( document ).ready(function() {
 
+  });
 
-  let dlb2 = new DualListbox('.select2', {
-        availableTitle:'Available numbers',
-        selectedTitle: 'Selected numbers',
-        addButtonText: '>',
-        removeButtonText: '<',
-        addAllButtonText: '>>',
-        removeAllButtonText: '<<',
-        searchPlaceholder: 'search numbers'
-    });
-    dlb2.addEventListener('added', function(event){
-        console.log(event);
-    });
-    dlb2.addEventListener('removed', function(event){
-        console.log(event);
-    });
+  var parcel_select = [];
+  function fn_parcel_sel() {
+      let id = $("#parcel_sel").val();
+      let val = $("#parcel_sel").children("option:selected").val();
+
+      if( parcel_select.includes(val) ) {
+        // $("#parcel_sel option:selected").removeClass("sel_chk");
+        // let index = parcel_select.indexOf(val);
+        // if (index !== -1) {
+        //   parcel_select.splice(index, 1);
+        // }
+        alert("?");
+        
+      }else{
+        parcel_select.push(val);
+        $("#parcel_sel option:selected").addClass("sel_chk");
+        add_row(id);
+      }
+  }
+
+  function add_row(id) {
+    for (const [key, value] of Object.entries(obj_data)) {
+        if( id==value['id'] ) {
+            let code = "<input type='hidden' name=code[] value='"+value['code']+"'>" 
+                    + "<input type='hidden' name=id[] value='"+value['id']+"'>"
+                    + value['code'];
+            let btn = "<button class='btn btn-sm btn-danger' title='ลบ' onclick='del_row("+id+")' id='btn"+id+"'>"
+            + "<i class='bi bi-trash3'></i></button>";
+
+            let data_row = [];
+            data_row.push(code);
+            data_row.push(value['name']);
+            data_row.push(value['unit']);
+            data_row.push("<input type='number' class='form-control' name='amount[]' onchange='calnum(this)'>");
+            data_row.push("<input type='number' min=0 step='0.01' class='form-control' name='price[]' onchange='calnum(this)'>");
+            data_row.push("<input type='number' min=0 step='0.01' class='calnum form-control' readonly>");
+            data_row.push(btn);
+            tb.row.add(data_row).draw();
+        }
+    };
+
+    
+  }
+  function del_row(id) {
+    let node = $("#btn"+id);
+    tb.row( node.parents('tr') ).remove().draw();
+
+    $("#parcel_sel").val(id);
+    $("#parcel_sel option:selected").removeClass("sel_chk");
+    let val = $("#parcel_sel").children("option:selected").val();
+    let index = parcel_select.indexOf(val);
+    if (index !== -1) {
+        parcel_select.splice(index, 1);
+    }
+
+    calnumall();
+}
+
+   
+
+    function calnum(that) {
+        let node = $(that).parent().parent();
+        let amount = node.find('input').eq(2).val();
+        let price = node.find('input').eq(3).val();
+        let sum = node.find('input').eq(4);
+        if( amount && price ) {
+            sum.val(amount*price);
+            calnumall();
+        }
+    }
+    function calnumall() {
+        let sum = 0;
+        var obj = document.getElementsByClassName("calnum");
+        for (var i = 0; i < obj.length; i++) {
+            sum += parseFloat($(obj[i]).val());
+        }
+        $("#num_sum_all").val(sum);
+    }
+    
 </script>
 @endsection
+

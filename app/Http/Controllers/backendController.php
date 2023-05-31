@@ -150,7 +150,7 @@ class backendController extends Controller
 
 
     public function parcelIn() {
-        $data = [];
+        $data = DB::table("parcel_detail")->whereNull("deleted_at")->get();
         return view('backend/parcel/in', [
             "data"=>$data
         ]);
