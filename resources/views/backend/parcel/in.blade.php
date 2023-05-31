@@ -24,11 +24,17 @@
         content: ' \2611';
         margin-right: 5px;
     }
+    .bg-sky {
+      background-color: lightskyblue;
+    }
 </style>
 @endsection
 
 @section('content')
 <section id="portfolio" class="portfolio section-bg">
+<form method="post" action="{{ Route('parcel.in.add') }}" id="formPopup">
+@csrf
+
 <div class="container">
 
   <div class="section-bg" data-aos="fade-left">
@@ -38,29 +44,32 @@
           </div>
           <div class="col-md-3">
             <div class="input-group mb-3">
-              <span class="input-group-text">เลขที่ใบสั่งซื้อ</span>
-              <input type="text" class="form-control" placeholder="เลขที่ใบสั่งซื้อ" id="code">
+              <span class="input-group-text bg-sky">เลขที่ใบสั่งซื้อ</span>
+              <input type="text" class="form-control" placeholder="เลขที่ใบสั่งซื้อ" name="order_number" required>
             </div>
           </div>
           <div class="col-md-3">
             <div class="input-group mb-3">
-              <span class="input-group-text">วันที่ซื้อ</span>
-              <input type="date" class="form-control" placeholder="วันที่ซื้อ" id="purchase_date">
+              <span class="input-group-text bg-sky">วันที่ซื้อ</span>
+              <input type="date" class="form-control" placeholder="วันที่ซื้อ" name="purchase_date" required value="{{date('Y-m-d')}}">
             </div>
           </div>
       </div>
   </div>
 
   <div class="py-3" data-aos="fade-up">
-    <div class="mb-2">
+    <div class="bg-white p-2">
         <div class="row">
             <div class="col-md-4">
                 <h5 class="p-2 bg-dark text-white">รายการวัสดุ</h5>
-                <select class="form-control"  name="parcel_sel[]" id="parcel_sel" multiple size = 20 onchange="fn_parcel_sel(this)">
+                <input type="text" id="searchFilter" placeholder="Search" class="form-control" onkeyup="FilterItems(this.value);" />
+                <select class="form-control"  name="parcel_sel[]" id="parcel_sel" multiple size = 12 onchange="fn_parcel_sel(this)">
                 @foreach( $data as $item )
                 <option value="{{$item->id}}">{{$item->name}}</option>
                 @endforeach
                 </select>
+                <br>
+                <button type="submit" class="w-100 fs-2 btn btn-primary">บันทึก</button>
             </div>
             <div class="col-md-8">
                 <h5 class="p-2 bg-dark text-white">รายการวัสดุที่เลือก</h5>
@@ -69,7 +78,7 @@
                 <table id="myTable" class="table table-bordered table-sm">
                     <thead class="bg-gradient-blue">
                         <tr>
-                        <th>รหัส</th>
+                        <th style="width: 60px;">รหัส</th>
                         <th>ชื่อวัสดุ</th>
                         <th style="width: 60px;">หน่วย</th>
                         <th style="width: 90px;">จำนวน</th>
@@ -98,6 +107,7 @@
 
 
 </div>
+</form>
 </section>
 
 @endsection
@@ -153,6 +163,36 @@ $(function() {
 
   });
 
+    var ddlText, ddlValue, ddl;
+    function CacheItems() {
+    ddlText = new Array();
+    ddlValue = new Array();
+    ddl = document.getElementById("parcel_sel");
+    for (var i = 0; i < ddl.options.length; i++) {
+        ddlText[ddlText.length] = ddl.options[i].text;
+        ddlValue[ddlValue.length] = ddl.options[i].value;
+    }
+    }
+    window.onload = CacheItems;
+
+    function FilterItems(value) {
+    ddl.options.length = 0;
+    for (var i = 0; i < ddlText.length; i++) {
+        if (ddlText[i].toLowerCase().indexOf(value) != -1 || ddlText[i].toUpperCase().indexOf(value) != -1) {
+            AddItem(ddlText[i], ddlValue[i]);
+        }
+    }
+    }
+
+    function AddItem(text, value) {
+    var opt = document.createElement("option");
+    opt.text = text;
+    opt.value = value;
+    ddl.options.add(opt);
+    }
+
+
+
   var parcel_select = [];
   function fn_parcel_sel() {
       let id = $("#parcel_sel").val();
@@ -164,7 +204,6 @@ $(function() {
         // if (index !== -1) {
         //   parcel_select.splice(index, 1);
         // }
-        alert("?");
         
       }else{
         parcel_select.push(val);
@@ -176,16 +215,15 @@ $(function() {
   function add_row(id) {
     for (const [key, value] of Object.entries(obj_data)) {
         if( id==value['id'] ) {
-            let code = "<input type='hidden' name=code[] value='"+value['code']+"'>" 
-                    + "<input type='hidden' name=id[] value='"+value['id']+"'>"
+            let code = "<input type='hidden' name=parcel_detail_id[] value='"+value['parcel_id']+"'>" 
                     + value['code'];
             let btn = "<button class='btn btn-sm btn-danger' title='ลบ' onclick='del_row("+id+")' id='btn"+id+"'>"
             + "<i class='bi bi-trash3'></i></button>";
 
             let data_row = [];
-            data_row.push(code);
+            data_row.push("<div align='center'>"+code+"</div>");
             data_row.push(value['name']);
-            data_row.push(value['unit']);
+            data_row.push("<div align='center'>"+value['unit']+"</div>");
             data_row.push("<input type='number' class='form-control' name='amount[]' onchange='calnum(this)'>");
             data_row.push("<input type='number' min=0 step='0.01' class='form-control' name='price[]' onchange='calnum(this)'>");
             data_row.push("<input type='number' min=0 step='0.01' class='calnum form-control' readonly>");
@@ -215,9 +253,9 @@ $(function() {
 
     function calnum(that) {
         let node = $(that).parent().parent();
-        let amount = node.find('input').eq(2).val();
-        let price = node.find('input').eq(3).val();
-        let sum = node.find('input').eq(4);
+        let amount = node.find('input').eq(1).val();
+        let price = node.find('input').eq(2).val();
+        let sum = node.find('input').eq(3);
         if( amount && price ) {
             sum.val(amount*price);
             calnumall();
@@ -227,7 +265,7 @@ $(function() {
         let sum = 0;
         var obj = document.getElementsByClassName("calnum");
         for (var i = 0; i < obj.length; i++) {
-            sum += parseFloat($(obj[i]).val());
+          sum += parseFloat($(obj[i]).val());
         }
         $("#num_sum_all").val(sum);
     }

@@ -66,7 +66,7 @@
                     <tr>
                       <td>
                         @if(empty($item->pic))
-                        <img src="{{asset('assets/img/blank.png') }}" class="square">
+                        <img src="{{asset('assets/img/blank.png') }}" class="square2">
                         @else
                         <img src="{{asset('assets/parcel') }}/{{$item->pic}}" class="square2">
                         @endif

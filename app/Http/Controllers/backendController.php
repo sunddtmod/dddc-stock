@@ -6,8 +6,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\CmsHelper as cms;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Session;
 use Exception;
 use Image;
+use App\Models\store_order;
+use App\Models\store_list;
 
 class backendController extends Controller
 {
@@ -88,9 +91,11 @@ class backendController extends Controller
         }
         //----------------------------------------------------
         if ($request->file('image') != NULL) {
-            $old_pic = $request->old_pic;
-            $target = public_path('/assets/parcel');
-            unlink($target."/".$old_pic);
+            if(!empty($old_pic)) {
+                $old_pic = $request->old_pic;
+                $target = public_path('/assets/parcel');
+                unlink($target."/".$old_pic);
+            }
         }
         //----------------------------------------------------
         $input = [];
@@ -146,8 +151,6 @@ class backendController extends Controller
     }
 
     
-    
-
 
     public function parcelIn() {
         $data = DB::table("parcel_detail")->whereNull("deleted_at")->get();
@@ -155,6 +158,44 @@ class backendController extends Controller
             "data"=>$data
         ]);
     }
+    public function parcelInAdd(Request $request) {
+        try {
+            //--------------[ใบรายการ]-----------
+            $store_order = new store_order();
+            $store_order->order_number = $request->order_number;
+            $store_order->user_create = Session::get('cid');
+            $store_order->purchase_date = $request->purchase_date;
+            $store_order->save();
+            $order_id = $store_order->id;
+            //--------------[รายละเอียดของใน - ใบรายการ]---------------
+            $data = [];
+            $parcel_detail_id = $request->parcel_detail_id;
+            $amount = $request->amount;
+            $price = $request->price;
+
+            foreach($parcel_detail_id as $x=>$detail_id) {
+                $temp = [   'order_id'=>$order_id,
+                            'parcel_detail_id'=>$detail_id, 
+                            'balance'=>$amount[$x], 
+                            'amount'=>$amount[$x], 
+                            'price'=>$price[$x] 
+                        ];
+                $data[] = $temp;
+            }
+            $store_list = new store_list();
+            $store_list->insert($data);
+
+            //------------[ อัพเดท - parcel_detail ]--------------
+            //------------[ เก็บ log เอาไว้ทำกราฟ ]-----------------
+            //----------------------------------------------------
+
+            return redirect()->back()->with(['Success'=>"บันทึกสำเร็จ"]);
+        }catch (Exception $e) {
+            return redirect()->back()->with(['Error'=>'อัพเดทไม่สำเร็จ']);
+        } 
+    }
+
+
     public function parcelOut() {
         $data = [];
         return view('backend/parcel/out', [

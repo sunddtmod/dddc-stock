@@ -29,6 +29,8 @@ Route::group(['middleware' => 'keycloak-web'], function () {
     //End
 
     Route::get('/parcel/in', [back::class, 'parcelIn'])->name('parcel.in');
+    Route::post('/parcel/in_add', [back::class, 'parcelInAdd'])->name('parcel.in.add');
+
     Route::get('/parcel/out', [back::class, 'parcelOut'])->name('parcel.out');
 
     // report
