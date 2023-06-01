@@ -37,8 +37,20 @@
 
 <div class="container">
 
+
   <div class="section-bg" data-aos="fade-left">
-  <h3 class="ps-3">รับเข้า</h3>
+    <div class="row">
+      <div class="col-md-8"><h3 class="ps-3">รับเข้า</h3></div>
+      <div class="col-md-4">
+
+        <div class="input-group">
+          <span class="input-group-text">BARCODE</span>
+          <input type="text" class="form-control" id="myBarCode">
+          <button onclick="fn_scanbarcode()" class="d-none">add</button>
+        </div>
+
+      </div>
+    </div>
   </div>
 
   <div class="py-3" data-aos="fade-up">
@@ -46,7 +58,8 @@
         <div class="row">
             <div class="col-md-4">
                 <h5 class="p-2 bg-dark text-white">รายการวัสดุ</h5>
-                <input type="text" id="searchFilter" placeholder="Search" class="form-control" onkeyup="FilterItems(this.value);" />
+                <input type="text" id="searchFilter" placeholder="Search" class="form-control" 
+                  onkeyup="FilterItems(this.value);" />
                 <select class="form-control"  name="parcel_sel[]" id="parcel_sel" multiple size = 12 onchange="fn_parcel_sel(this)">
                 @foreach( $data as $item )
                 <option value="{{$item->id}}">{{$item->name}}</option>
@@ -73,7 +86,6 @@
                       </div>
                     </div>
                 </div>
-
 
                 <div class="table-responsive">
                 <table id="myTable" class="table table-bordered table-sm">
@@ -147,6 +159,7 @@
 
 <script>
 var obj_data = <?=json_encode($data, JSON_UNESCAPED_UNICODE)?>;
+var barcode_data = <?=json_encode($barcode, JSON_UNESCAPED_UNICODE)?>;
 var row_data = [];
 var tb;
 var counter = 1;
@@ -180,47 +193,55 @@ $(function() {
     window.onload = CacheItems;
 
     function FilterItems(value) {
-    ddl.options.length = 0;
-    for (var i = 0; i < ddlText.length; i++) {
-        if (ddlText[i].toLowerCase().indexOf(value) != -1 || ddlText[i].toUpperCase().indexOf(value) != -1) {
-            AddItem(ddlText[i], ddlValue[i]);
-        }
+      //กรณียิง barcode
+      ddl.options.length = 0;
+      for (var i = 0; i < ddlText.length; i++) {
+          if (ddlText[i].toLowerCase().indexOf(value) != -1 || ddlText[i].toUpperCase().indexOf(value) != -1) {
+              AddItem(ddlText[i], ddlValue[i]);
+          }
+      }
     }
+
+    function fn_scanbarcode() {
+      setTimeout(function() {
+        document.getElementById("myBarCode").focus();
+      }, 100);
+      
+      if($('#myBarCode').val()){
+          let barCode = $('#myBarCode').val();
+          barCode = barCode.substr(0,11);
+          let parcel_id = barcode_data[barCode];
+
+          $("#parcel_sel").val(parcel_id);
+          fn_parcel_sel();
+          $('#myBarCode').val('');
+      }
     }
 
     function AddItem(text, value) {
-    var opt = document.createElement("option");
-    opt.text = text;
-    opt.value = value;
-    ddl.options.add(opt);
+      var opt = document.createElement("option");
+      opt.text = text;
+      opt.value = value;
+      ddl.options.add(opt);
     }
 
-
-
+    //กดเพิ่มรายการ
   var parcel_select = [];
   function fn_parcel_sel() {
       let id = $("#parcel_sel").val();
       let val = $("#parcel_sel").children("option:selected").val();
 
-      if( parcel_select.includes(val) ) {
-        // $("#parcel_sel option:selected").removeClass("sel_chk");
-        // let index = parcel_select.indexOf(val);
-        // if (index !== -1) {
-        //   parcel_select.splice(index, 1);
-        // }
-        
-      }else{
-        parcel_select.push(val);
-        $("#parcel_sel option:selected").addClass("sel_chk");
-        add_row(id);
-      }
+      parcel_select.push(val);
+      $("#parcel_sel option:selected").addClass("sel_chk");
+      add_row(id);
+      
   }
 
   function add_row(id) {
     for (const [key, value] of Object.entries(obj_data)) {
         if( id==value['id'] ) {
             let code = "<input type='hidden' name=parcel_detail_id[] value='"+value['id']+"'>" + value['code'];
-            let btn = "<button class='btn btn-sm btn-danger' title='ลบ' onclick='del_row("+id+")' id='btn"+id+"'>"
+            let btn = "<button type='button' class='btn btn-sm btn-danger' title='ลบ' onclick='del_row("+id+")' id='btn"+id+"'>"
             + "<i class='bi bi-trash3'></i></button>";
 
             let data_row = [];

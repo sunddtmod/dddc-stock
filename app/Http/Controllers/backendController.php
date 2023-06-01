@@ -154,8 +154,14 @@ class backendController extends Controller
 
     public function parcelIn() {
         $data = DB::table("parcel_detail")->whereNull("deleted_at")->get();
+        $barcode = [];
+        foreach($data as $index=>$item) {
+            $barcode[$item->parcel_id . "0" . $item->code] = $item->id;
+        }
+
         return view('backend/parcel/in', [
-            "data"=>$data
+            "data"=>$data,
+            "barcode"=>$barcode
         ]);
     }
     public function parcelInAdd(Request $request) {
@@ -207,7 +213,10 @@ class backendController extends Controller
             }
             DB::table('parcel_log')->insert($data_for_log);
             //----------------------------------------------------
-            return redirect()->back()->with(['Success'=>"บันทึกสำเร็จ"]);
+            return redirect()->route('parcel.history',[
+                "type"=>"in",
+                "id"=>$order_id
+            ]);
         }catch (Exception $e) {
             return redirect()->back()->with(['Error'=>'บันทึกไม่สำเร็จ']);
         } 
@@ -220,4 +229,13 @@ class backendController extends Controller
             "data"=>$data
         ]);
     }
+
+    public function parcelHistory($type='out', $id=0) {
+        $data = [];
+        return view('backend/parcel/history', [
+            "data"=>$data
+        ]);
+    }
+
+    
 }

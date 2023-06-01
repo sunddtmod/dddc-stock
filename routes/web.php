@@ -33,6 +33,8 @@ Route::group(['middleware' => 'keycloak-web'], function () {
 
     Route::get('/parcel/out', [back::class, 'parcelOut'])->name('parcel.out');
 
+    Route::get('/parcel/history/{type?}/{id?}', [back::class, 'parcelHistory'])->name('parcel.history');
+
     // report
         Route::get('/report/balance', [report::class, 'balance'])->name('report.balance');
     //End

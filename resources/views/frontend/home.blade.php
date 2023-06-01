@@ -18,6 +18,13 @@
     width: 100% !important;
     height: 100% !important;
   }
+
+  .portfolio .portfolio-wrap {
+      text-align: center;
+  }
+  .barcode {
+    width: 100%;
+  }
 </style>
 @endsection
 
@@ -59,14 +66,14 @@
                         title="{{ $item->parcel_id }}0{{ $item->code }}<br>{{ $item->name }}"><i class="bi bi-plus"></i></a>
                       </div>
                       <div align="center">
-                        <h4>{{ number_format($item->balance) }}</h4>
+                        <h4>{{ number_format($item->balance) }} {{$item->unit}}</h4>
                           <svg class="barcode"
                             jsbarcode-format="upc"
-                            jsbarcode-height="40",
+                            jsbarcode-height="40"
+                            jsbarcode-textmargin="0"
                             jsbarcode-value="{{ $item->parcel_id }}0{{ $item->code }}"
                           >
                           </svg>
-                          
                           <p>{{ $item->name }}</p>
                       </div>
                     </div>

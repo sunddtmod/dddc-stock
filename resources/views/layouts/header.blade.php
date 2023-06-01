@@ -16,6 +16,7 @@
               <li><a href="{{ Route('parcel.in') }}">รับเข้า</a></li>
               <li><a href="{{ Route('parcel.out') }}">จ่ายออก</a></li>
               <li><a href="{{ Route('parcel.register') }}">ลงทะเบียนวัสดุใหม่</a></li>
+              <li><a href="{{ Route('parcel.history') }}">ประวัติ</a></li>
             </ul>
           </li>
           @endcan
