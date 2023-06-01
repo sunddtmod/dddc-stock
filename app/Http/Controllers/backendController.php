@@ -169,6 +169,9 @@ class backendController extends Controller
             $order_id = $store_order->id;
             //--------------[รายละเอียดของใน - ใบรายการ]---------------
             $data = [];
+            $data_for_update = [];
+            $data_for_log = [];
+
             $parcel_detail_id = $request->parcel_detail_id;
             $amount = $request->amount;
             $price = $request->price;
@@ -181,17 +184,32 @@ class backendController extends Controller
                             'price'=>$price[$x] 
                         ];
                 $data[] = $temp;
+                //-------------------------------
+                $data_for_update[$detail_id] = intval($amount[$x]);
             }
             $store_list = new store_list();
             $store_list->insert($data);
-
             //------------[ อัพเดท - parcel_detail ]--------------
-            //------------[ เก็บ log เอาไว้ทำกราฟ ]-----------------
-            //----------------------------------------------------
+            $parcel_list = cms::toArray("parcel_detail","id","balance");
+            foreach($data_for_update as $id=>$val) {
+                $balance = $parcel_list[$id] + $val;
+                DB::table('parcel_detail')->where('id', $id)->update([
+                    "balance" => $balance,
+                    "updated_at" => date("Y-m-d")
+                ]);
 
+                $data_for_log[] = [
+                    "parcel_detail_id"=>$id,
+                    "amount"=>$val,
+                    "created_at" => date("Y-m-d"),
+                    "user_id" => Session::get('cid')
+                ];
+            }
+            DB::table('parcel_log')->insert($data_for_log);
+            //----------------------------------------------------
             return redirect()->back()->with(['Success'=>"บันทึกสำเร็จ"]);
         }catch (Exception $e) {
-            return redirect()->back()->with(['Error'=>'อัพเดทไม่สำเร็จ']);
+            return redirect()->back()->with(['Error'=>'บันทึกไม่สำเร็จ']);
         } 
     }
 

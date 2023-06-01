@@ -38,23 +38,7 @@
 <div class="container">
 
   <div class="section-bg" data-aos="fade-left">
-      <div class="row">
-          <div class="col-md-6">
-              <h3 class="ps-3">รับเข้า</h3>
-          </div>
-          <div class="col-md-3">
-            <div class="input-group mb-3">
-              <span class="input-group-text bg-sky">เลขที่ใบสั่งซื้อ</span>
-              <input type="text" class="form-control" placeholder="เลขที่ใบสั่งซื้อ" name="order_number" required>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="input-group mb-3">
-              <span class="input-group-text bg-sky">วันที่ซื้อ</span>
-              <input type="date" class="form-control" placeholder="วันที่ซื้อ" name="purchase_date" required value="{{date('Y-m-d')}}">
-            </div>
-          </div>
-      </div>
+  <h3 class="ps-3">รับเข้า</h3>
   </div>
 
   <div class="py-3" data-aos="fade-up">
@@ -68,11 +52,28 @@
                 <option value="{{$item->id}}">{{$item->name}}</option>
                 @endforeach
                 </select>
-                <br>
-                <button type="submit" class="w-100 fs-2 btn btn-primary">บันทึก</button>
             </div>
             <div class="col-md-8">
-                <h5 class="p-2 bg-dark text-white">รายการวัสดุที่เลือก</h5>
+
+
+                <div class="row p-2 bg-dark text-white">
+                    <div class="col-md-4">
+                    <h5>รายการวัสดุที่เลือก</h5>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="input-group">
+                        <span class="input-group-text bg-primary text-white">เลขที่ใบสั่งซื้อ</span>
+                        <input type="text" class="form-control" placeholder="เลขที่ใบสั่งซื้อ" name="order_number" required>
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="input-group">
+                        <span class="input-group-text bg-primary text-white">วันที่ซื้อ</span>
+                        <input type="date" class="form-control" placeholder="วันที่ซื้อ" name="purchase_date" required value="{{date('Y-m-d')}}">
+                      </div>
+                    </div>
+                </div>
+
 
                 <div class="table-responsive">
                 <table id="myTable" class="table table-bordered table-sm">
@@ -98,6 +99,9 @@
                     </tfoot>
                 </table>
                 </div>
+
+                <br>
+                <button type="submit" class="w-100 fs-2 btn btn-primary">บันทึก</button>
 
             </div>
         </div>
@@ -215,8 +219,7 @@ $(function() {
   function add_row(id) {
     for (const [key, value] of Object.entries(obj_data)) {
         if( id==value['id'] ) {
-            let code = "<input type='hidden' name=parcel_detail_id[] value='"+value['parcel_id']+"'>" 
-                    + value['code'];
+            let code = "<input type='hidden' name=parcel_detail_id[] value='"+value['id']+"'>" + value['code'];
             let btn = "<button class='btn btn-sm btn-danger' title='ลบ' onclick='del_row("+id+")' id='btn"+id+"'>"
             + "<i class='bi bi-trash3'></i></button>";
 
@@ -224,7 +227,7 @@ $(function() {
             data_row.push("<div align='center'>"+code+"</div>");
             data_row.push(value['name']);
             data_row.push("<div align='center'>"+value['unit']+"</div>");
-            data_row.push("<input type='number' class='form-control' name='amount[]' onchange='calnum(this)'>");
+            data_row.push("<input type='number' min=0 class='form-control' name='amount[]' onchange='calnum(this)'>");
             data_row.push("<input type='number' min=0 step='0.01' class='form-control' name='price[]' onchange='calnum(this)'>");
             data_row.push("<input type='number' min=0 step='0.01' class='calnum form-control' readonly>");
             data_row.push(btn);
