@@ -52,7 +52,7 @@
                     <thead class="bg-gradient-blue">
                         <tr>
                         <th>ภาพประกอบ</th>
-                        <th>รหัส - ชื่อ</th>
+                        <th>หมวด:รหัส</th>
                         <th>ชื่อ</th>
                         <th>คงเหลือ</th>
                         <th>หน่วยนับ</th>
@@ -71,7 +71,7 @@
                         <img src="{{asset('assets/parcel') }}/{{$item->pic}}" class="square2">
                         @endif
                       </td>
-                      <td>{{ $item->code }}</td>
+                      <td>{{ $item->parcel_id }}:{{ $item->code }}</td>
                       <td>{{ $item->name }}</td>
                       <td align="right">
                         {{ number_format($item->balance) }}
@@ -145,7 +145,7 @@
 
                 <div class="col-md-12">
                   <span>รหัส</span><span class="text-danger"> * </span>
-                  <input type="text" class="form-control" name="code" id="code" required>
+                  <input type="text" class="form-control" name="code" id="code" placeholder="ไม่เกิน 3 หลัก" maxlength="3" required>
                 </div>
                 <div class="col-md-12">
                   <span>ชื่อ</span><span class="text-danger"> * </span>

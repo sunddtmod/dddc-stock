@@ -67,11 +67,16 @@
                       </div>
                       <div align="center">
                         <h4>{{ number_format($item->balance) }} {{$item->unit}}</h4>
+                          <?php
+                          // |00000000|000|
+                          // ID => |หมวด|รหัสของ|
+                          $gen_code = $item->parcel_id.$item->code;
+                          ?>
                           <svg class="barcode"
                             jsbarcode-format="upc"
                             jsbarcode-height="40"
                             jsbarcode-textmargin="0"
-                            jsbarcode-value="{{ $item->parcel_id }}0{{ $item->code }}"
+                            jsbarcode-value="{{ $gen_code}}"
                           >
                           </svg>
                           <p>{{ $item->name }}</p>

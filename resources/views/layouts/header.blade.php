@@ -16,7 +16,6 @@
               <li><a href="{{ Route('parcel.in') }}">รับเข้า</a></li>
               <li><a href="{{ Route('parcel.out') }}">จ่ายออก</a></li>
               <li><a href="{{ Route('parcel.register') }}">ลงทะเบียนวัสดุใหม่</a></li>
-              <li><a href="{{ Route('parcel.history') }}">ประวัติ</a></li>
             </ul>
           </li>
           @endcan
@@ -35,6 +34,7 @@
               <li><a href="{{ Route('setting.area') }}">ที่เก็บ</a></li>
               <li><a href="{{ Route('setting.group') }}">หมวดพัสดุ</a></li>
               <li><a href="{{ Route('setting.user') }}">ผู้ใช้งานระบบ</a></li>
+              <!-- <li><a href="{{ Route('setting.sign_list') }}">ชื่อผู้ลงนาม</a></li> -->
             </ul>
           </li>
           @endcan

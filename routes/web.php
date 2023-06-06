@@ -29,11 +29,12 @@ Route::group(['middleware' => 'keycloak-web'], function () {
     //End
 
     Route::get('/parcel/in', [back::class, 'parcelIn'])->name('parcel.in');
-    Route::post('/parcel/in_add', [back::class, 'parcelInAdd'])->name('parcel.in.add');
+    Route::post('/parcel/in_store', [back::class, 'parcelInStore'])->name('parcel.in.store');
 
     Route::get('/parcel/out', [back::class, 'parcelOut'])->name('parcel.out');
+    Route::post('/parcel/out_store', [back::class, 'parcelOutStore'])->name('parcel.out.store');
 
-    Route::get('/parcel/history/{type?}/{id?}', [back::class, 'parcelHistory'])->name('parcel.history');
+    // Route::post('/parcel/list/{type?}/{id?}', [back::class, 'parcel_list'])->name('parcel.list');
 
     // report
         Route::get('/report/balance', [report::class, 'balance'])->name('report.balance');
@@ -53,6 +54,8 @@ Route::group(['middleware' => 'keycloak-web'], function () {
         Route::post('/setting/user_update/{cid?}', [setting::class, 'user_update'])->name('setting.user.update');
         Route::get('/setting/user_delte/{cid?}', [setting::class, 'user_delte'])->name('setting.user.delete');
         Route::get('/ajax/user_detail/{cid?}', [ajax::class, 'user_detail'])->name('user_detail');
+
+        Route::get('/setting/sign_list', [setting::class, 'sign_list'])->name('setting.sign_list');
     // end setting
 
 

@@ -25,14 +25,14 @@
         margin-right: 5px;
     }
     .bg-sky {
-      background-color: lightskyblue;
+      background-color: aliceblue;
     }
 </style>
 @endsection
 
 @section('content')
 <section id="portfolio" class="portfolio section-bg">
-<form method="post" action="{{ Route('parcel.in.add') }}" id="formPopup">
+<form method="post" action="{{ Route('parcel.in.store') }}" id="formPopup">
 @csrf
 
 <div class="container">
@@ -56,7 +56,7 @@
   <div class="py-3" data-aos="fade-up">
     <div class="bg-white p-2">
         <div class="row">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <h5 class="p-2 bg-dark text-white">รายการวัสดุ</h5>
                 <input type="text" id="searchFilter" placeholder="Search" class="form-control" 
                   onkeyup="FilterItems(this.value);" />
@@ -66,12 +66,12 @@
                 @endforeach
                 </select>
             </div>
-            <div class="col-md-8">
+            <div class="col-md-9">
 
 
-                <div class="row p-2 bg-dark text-white">
+                <div class="row p-2">
                     <div class="col-md-4">
-                    <h5>รายการวัสดุที่เลือก</h5>
+                    <h5>ใบจัดซื้อวัสดุ</h5>
                     </div>
                     <div class="col-md-4">
                       <div class="input-group">
@@ -82,12 +82,12 @@
                     <div class="col-md-4">
                       <div class="input-group">
                         <span class="input-group-text bg-primary text-white">วันที่ซื้อ</span>
-                        <input type="date" class="form-control" placeholder="วันที่ซื้อ" name="purchase_date" required value="{{date('Y-m-d')}}">
+                        <input type="date" class="form-control" placeholder="วันที่ซื้อ" name="purchase_date" value="{{date('Y-m-d')}}">
                       </div>
                     </div>
                 </div>
 
-                <div class="table-responsive">
+                <div class="table-responsive pt-3">
                 <table id="myTable" class="table table-bordered table-sm">
                     <thead class="bg-gradient-blue">
                         <tr>
@@ -102,7 +102,7 @@
                     </thead>
                     <tbody></tbody>
                     <tfoot>
-                        <tr>
+                        <tr class="bg-sky">
                             <td></td><td></td><td></td><td></td>
                             <td><div align="right">รวม</div></td>
                             <td><input type='number' step='0.01' class='form-control' readonly id="num_sum_all"></td>
@@ -113,7 +113,7 @@
                 </div>
 
                 <br>
-                <button type="submit" class="w-100 fs-2 btn btn-primary">บันทึก</button>
+                <button type="submit" id="btn_submit" class="w-100 fs-2 btn btn-primary" disabled>บันทึก</button>
 
             </div>
         </div>
@@ -162,7 +162,7 @@ var obj_data = <?=json_encode($data, JSON_UNESCAPED_UNICODE)?>;
 var barcode_data = <?=json_encode($barcode, JSON_UNESCAPED_UNICODE)?>;
 var row_data = [];
 var tb;
-var counter = 1;
+var counter = 0;
 
 $(function() {
     tb = $("#myTable").DataTable({
@@ -231,16 +231,18 @@ $(function() {
       let id = $("#parcel_sel").val();
       let val = $("#parcel_sel").children("option:selected").val();
 
-      parcel_select.push(val);
-      $("#parcel_sel option:selected").addClass("sel_chk");
-      add_row(id);
-      
+      if( !parcel_select.includes( val) ) {
+        parcel_select.push(val);
+        $("#parcel_sel option:selected").addClass("sel_chk");
+        add_row(id);
+      } 
   }
 
   function add_row(id) {
     for (const [key, value] of Object.entries(obj_data)) {
         if( id==value['id'] ) {
-            let code = "<input type='hidden' name=parcel_detail_id[] value='"+value['id']+"'>" + value['code'];
+          if(parcel_select.includes(id) == false) {
+            let code = "<input type='hidden' name=parcel_detail_id[] value='"+value['id']+"'>" + value['parcel_id'] +":"+ value['code'];
             let btn = "<button type='button' class='btn btn-sm btn-danger' title='ลบ' onclick='del_row("+id+")' id='btn"+id+"'>"
             + "<i class='bi bi-trash3'></i></button>";
 
@@ -248,11 +250,14 @@ $(function() {
             data_row.push("<div align='center'>"+code+"</div>");
             data_row.push(value['name']);
             data_row.push("<div align='center'>"+value['unit']+"</div>");
-            data_row.push("<input type='number' min=0 class='form-control' name='amount[]' onchange='calnum(this)'>");
-            data_row.push("<input type='number' min=0 step='0.01' class='form-control' name='price[]' onchange='calnum(this)'>");
+            data_row.push("<input type='number' min=0 required class='form-control' name='amount[]' onchange='calnum(this)'>");
+            data_row.push("<input type='number' min=0 step='0.01' required class='form-control' name='price[]' onchange='calnum(this)'>");
             data_row.push("<input type='number' min=0 step='0.01' class='calnum form-control' readonly>");
             data_row.push(btn);
             tb.row.add(data_row).draw();
+            counter++;
+            dis_btn();
+          }
         }
     };
 
@@ -261,6 +266,8 @@ $(function() {
   function del_row(id) {
     let node = $("#btn"+id);
     tb.row( node.parents('tr') ).remove().draw();
+    counter--;
+    dis_btn();
 
     $("#parcel_sel").val(id);
     $("#parcel_sel option:selected").removeClass("sel_chk");
@@ -273,6 +280,13 @@ $(function() {
     calnumall();
 }
 
+function dis_btn() {
+  if( counter > 0 ) {
+    document.getElementById("btn_submit").disabled = false;
+  }else{
+    document.getElementById("btn_submit").disabled = true;
+  }
+}
    
 
     function calnum(that) {

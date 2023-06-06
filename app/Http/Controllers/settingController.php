@@ -103,4 +103,14 @@ class settingController extends Controller
             return redirect()->back()->with(['Error'=>'ลบไม่สำเร็จ']);
         }  
     }
+
+
+     //-----------------------[ sign_list ]----------------------
+     public function sign_list() {
+        $data = DB::table("ref_sign_list")->get();
+        return view('backend/setting/sign_list', [
+            "data"=>$data
+        ]);
+    }
+    
 }

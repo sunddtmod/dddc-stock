@@ -11,6 +11,8 @@ use Exception;
 use Image;
 use App\Models\store_order;
 use App\Models\store_list;
+use App\Models\withdraw;
+use App\Models\withdraw_list;
 
 class backendController extends Controller
 {
@@ -19,6 +21,7 @@ class backendController extends Controller
         return redirect()->route('keycloak.logout');
     }
 
+    //ลงทะเบียนวัสดุใหม่
     public function parcelRegister() {
         $query = DB::table("ref_parcel_group")->select("id","name")->where("status",1)->get();
         $group = cms::ObjArr($query);
@@ -35,6 +38,7 @@ class backendController extends Controller
         $rule = array();
         $rule['image'] = 'image|mimes:png,jpg|max:10240';
         $rule['parcel_id'] = ['required'];
+        $rule['code'] = ['required', 'string', 'max:3'];
         $rule['name'] = ['required', 'string', 'max:255'];
         $rule['unit'] = ['required', 'string', 'max:255'];
         $rule['area_id'] = ['required'];
@@ -61,7 +65,7 @@ class backendController extends Controller
         //----------------------------------------------------
         try {
             $input['parcel_id'] = $request->parcel_id;
-            $input['code'] = $request->code;
+            $input['code'] = str_pad( $request->code, 3, "0", STR_PAD_LEFT);
             $input['name'] = $request->name;
             $input['detail'] = $request->detail;
             $input['unit'] = $request->unit;
@@ -82,6 +86,7 @@ class backendController extends Controller
         $rule = array();
         $rule['image'] = 'image|mimes:png,jpg|max:10240';
         $rule['parcel_id'] = ['required'];
+        $rule['code'] = ['required', 'string', 'max:3'];
         $rule['name'] = ['required', 'string', 'max:255'];
         $rule['unit'] = ['required', 'string', 'max:255'];
         $rule['area_id'] = ['required'];
@@ -115,7 +120,7 @@ class backendController extends Controller
         //----------------------------------------------------
         try {
             $input['parcel_id'] = $request->parcel_id;
-            $input['code'] = $request->code;
+            $input['code'] = str_pad( $request->code, 3, "0", STR_PAD_LEFT);
             $input['name'] = $request->name;
             $input['detail'] = $request->detail;
             $input['unit'] = $request->unit;
@@ -132,7 +137,7 @@ class backendController extends Controller
             return redirect()->back()->with(['Error'=>'อัพเดทไม่สำเร็จ']);
         } 
     }
-    public function parcel_delte($id) {
+    public function parcel_delete($id) {
         try {
             DB::table("parcel_detail")->where('id', $id)->update([
                 "deleted_at"=>date("Y-m-d H:i:s")
@@ -142,21 +147,20 @@ class backendController extends Controller
             return redirect()->back()->with(['Error'=>'ลบไม่สำเร็จ']);
         }  
     }
-
     public function parcel_status($id, $val) {
-        $data = DB::table("parcel_detail")->where('id', $id)->update([
+        DB::table("parcel_detail")->where('id', $id)->update([
             'status'=>$val
         ]);
         return response()->json(['msg'=>'Success'] );
     }
 
     
-
+    //รับเข้า STORE
     public function parcelIn() {
         $data = DB::table("parcel_detail")->whereNull("deleted_at")->get();
         $barcode = [];
         foreach($data as $index=>$item) {
-            $barcode[$item->parcel_id . "0" . $item->code] = $item->id;
+            $barcode[$item->parcel_id . $item->code] = $item->id;
         }
 
         return view('backend/parcel/in', [
@@ -164,15 +168,110 @@ class backendController extends Controller
             "barcode"=>$barcode
         ]);
     }
-    public function parcelInAdd(Request $request) {
+    public function parcelInStore(Request $request) {
         try {
             //--------------[ใบรายการ]-----------
             $store_order = new store_order();
+            $store_order->fyear = date("Y",strtotime("+3 month",strtotime(date('y-m-d')))) + 543;
             $store_order->order_number = $request->order_number;
             $store_order->user_create = Session::get('cid');
             $store_order->purchase_date = $request->purchase_date;
             $store_order->save();
             $order_id = $store_order->id;
+            //--------------[รายละเอียดของใน - ใบรายการ]---------------
+            $data = [];
+            $data_for_update = [];
+            $data_for_log = [];
+
+            $parcel_detail_id = $request->parcel_detail_id;
+            $amount = $request->amount;
+            $price = $request->price;
+
+            foreach($parcel_detail_id as $x=>$detail_id) {
+                $temp = [   'order_id'=>$order_id,
+                            'parcel_detail_id'=>$detail_id, 
+                            'balance'=>$amount[$x], 
+                            'amount'=>$amount[$x], 
+                            'price'=>$price[$x] 
+                        ];
+                $data[] = $temp;
+                //-------------------------------
+                $data_for_update[$detail_id] = intval($amount[$x]);
+            }
+            $withdraw_list = new withdraw_list();
+            $withdraw_list->insert($data);
+            //------------[ อัพเดท - parcel_detail ]--------------
+            $parcel_list = cms::toArray("parcel_detail","id","balance");
+            foreach($data_for_update as $id=>$val) {
+                $balance = $parcel_list[$id] + $val;
+                DB::table('parcel_detail')->where('id', $id)->update([
+                    "balance" => $balance,
+                    "updated_at" => date("Y-m-d")
+                ]);
+
+                $data_for_log[] = [
+                    "parcel_detail_id"=>$id,
+                    "amount"=>$val,
+                    "created_at" => date("Y-m-d"),
+                    "user_id" => Session::get('cid')
+                ];
+            }
+            DB::table('parcel_log')->insert($data_for_log);
+            //----------------------------------------------------
+            return redirect()->route('parcel.list',[
+                "type"=>"in",
+                "id"=>$order_id
+            ]);
+        }catch (Exception $e) {
+            return redirect()->back()->with(['Error'=>'บันทึกไม่สำเร็จ']);
+        } 
+    }
+
+    //จ่ายออก withdraw
+    public function parcelOut() {
+        $data = DB::table("parcel_detail")->whereNull("deleted_at")->get();
+        $barcode = [];
+        foreach($data as $index=>$item) {
+            $barcode[$item->parcel_id . $item->code] = $item->id;
+        }
+        return view('backend/parcel/out', [
+            "data"=>$data,
+            "barcode"=>$barcode
+        ]);
+    }
+    public function parcelOutStore(Request $request) {
+        dd($request);
+        try {
+            //--------------[ใบรายการ]-----------
+            $withdraw = new withdraw();
+            $withdraw->fyear = date("Y",strtotime("+3 month",strtotime(date('y-m-d')))) + 543;
+            $withdraw->order_number = $request->withdraw_number;
+            $withdraw->user_create = Session::get('cid');
+            $withdraw->purchase_date = $request->purchase_date;
+            $withdraw->save();
+            $order_id = $withdraw->id;
+
+
+
+            // "parcel_sel" => array:1 [▶]
+            // "withdraw_number" => "1234"
+            // "myTable_length" => "10"
+            // "parcel_detail_id" => array:2 [▶]
+            // "amount" => array:2 [▶]
+            // "forerunner_name" => null
+            // "forerunner_date" => null
+            // "payer_name" => null
+            // "payer_date" => null
+            // "leader_name" => null
+            // "leader_date" => null
+            // "parcel_officer_name" => "นางสาวปาณิสรา  เชาว์พ้อง"
+            // "parcel_officer_date" => null
+            // "consignee_name" => null
+            // "consignee_date" => null
+            // "material_payer_name" => "นายสันทัด กงแก้ว"
+            // "material_payer_date" => "2023-06-02"
+
+
             //--------------[รายละเอียดของใน - ใบรายการ]---------------
             $data = [];
             $data_for_update = [];
@@ -223,18 +322,11 @@ class backendController extends Controller
     }
 
 
-    public function parcelOut() {
-        $data = [];
-        return view('backend/parcel/out', [
-            "data"=>$data
-        ]);
-    }
-
-    public function parcelHistory($type='out', $id=0) {
-        $data = [];
-        return view('backend/parcel/history', [
-            "data"=>$data
-        ]);
+    public function parcel_list($type='out', $id=0) {
+        // $data = [];
+        // return view('backend/parcel/list', [
+        //     "data"=>$data
+        // ]);
     }
 
     

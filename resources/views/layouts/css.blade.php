@@ -33,6 +33,9 @@
       transform:scale(2);
       margin: 0px 10px 16px 0px;
     }
+    .cursor-pointer {
+      cursor: pointer;
+    }
 
 
     #footer .footer-top .footer-info {
