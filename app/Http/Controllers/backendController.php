@@ -198,8 +198,8 @@ class backendController extends Controller
                 //-------------------------------
                 $data_for_update[$detail_id] = intval($amount[$x]);
             }
-            $withdraw_list = new withdraw_list();
-            $withdraw_list->insert($data);
+            $store_list = new store_list();
+            $store_list->insert($data);
             //------------[ อัพเดท - parcel_detail ]--------------
             $parcel_list = cms::toArray("parcel_detail","id","balance");
             foreach($data_for_update as $id=>$val) {
@@ -245,33 +245,57 @@ class backendController extends Controller
             //--------------[ใบรายการ]-----------
             $withdraw = new withdraw();
             $withdraw->fyear = date("Y",strtotime("+3 month",strtotime(date('y-m-d')))) + 543;
-            $withdraw->order_number = $request->withdraw_number;
-            $withdraw->user_create = Session::get('cid');
-            $withdraw->purchase_date = $request->purchase_date;
+            $withdraw->withdraw_number = $request->withdraw_number;
+            $withdraw->withdraw_type = 1; //เบิกใหม่
+            //(1) ผู้เบิกวัสดุ
+            if( !empty($request->forerunner_name) ) {
+                $withdraw->forerunner_name = $request->forerunner_name;
+            }
+            if( !empty($request->forerunner_date) ) {
+                $withdraw->forerunner_date = $request->forerunner_date;
+            }
+
+            //(2) ผู้สั่งจ่าย
+            if( !empty($request->payer_name) ) {
+                $withdraw->payer_name = $request->payer_name;
+            }
+            if( !empty($request->payer_date) ) {
+                $withdraw->payer_date = $request->payer_date;
+            }
+
+            //(3) หัวหน้ากลุ่ม
+            if( !empty($request->leader_name) ) {
+                $withdraw->leader_name = $request->leader_name;
+            }
+            if( !empty($request->leader_date) ) {
+                $withdraw->leader_date = $request->leader_date;
+            }
+
+            //(4) หัวหน้าเจ้าหน้าที่พัสดุ
+            if( !empty($request->parcel_officer_name) ) {
+                $withdraw->parcel_officer_name = $request->parcel_officer_name;
+            }
+            if( !empty($request->parcel_officer_date) ) {
+                $withdraw->parcel_officer_date = $request->parcel_officer_date;
+            }
+
+            //(5) ผู้รับของ
+            if( !empty($request->consignee_name) ) {
+                $withdraw->consignee_name = $request->consignee_name;
+            }
+            if( !empty($request->consignee_date) ) {
+                $withdraw->consignee_date = $request->consignee_date;
+            }
+
+            //(6) ผู้จ่ายวัสดุ
+            if( !empty($request->material_name) ) {
+                $withdraw->material_name = $request->material_name;
+            }
+            if( !empty($request->material_date) ) {
+                $withdraw->material_date = $request->material_date;
+            }
             $withdraw->save();
-            $order_id = $withdraw->id;
-
-
-
-            // "parcel_sel" => array:1 [▶]
-            // "withdraw_number" => "1234"
-            // "myTable_length" => "10"
-            // "parcel_detail_id" => array:2 [▶]
-            // "amount" => array:2 [▶]
-            // "forerunner_name" => null
-            // "forerunner_date" => null
-            // "payer_name" => null
-            // "payer_date" => null
-            // "leader_name" => null
-            // "leader_date" => null
-            // "parcel_officer_name" => "นางสาวปาณิสรา  เชาว์พ้อง"
-            // "parcel_officer_date" => null
-            // "consignee_name" => null
-            // "consignee_date" => null
-            // "material_payer_name" => "นายสันทัด กงแก้ว"
-            // "material_payer_date" => "2023-06-02"
-
-
+            $withdraw_id = $withdraw->id;
             //--------------[รายละเอียดของใน - ใบรายการ]---------------
             $data = [];
             $data_for_update = [];
@@ -279,25 +303,23 @@ class backendController extends Controller
 
             $parcel_detail_id = $request->parcel_detail_id;
             $amount = $request->amount;
-            $price = $request->price;
 
             foreach($parcel_detail_id as $x=>$detail_id) {
-                $temp = [   'order_id'=>$order_id,
+                $temp = [   'withdraw_id'=>$withdraw_id,
+                            'mem_name'=>$request->forerunner_name,
                             'parcel_detail_id'=>$detail_id, 
-                            'balance'=>$amount[$x], 
-                            'amount'=>$amount[$x], 
-                            'price'=>$price[$x] 
+                            'amount'=>$amount[$x]
                         ];
                 $data[] = $temp;
                 //-------------------------------
                 $data_for_update[$detail_id] = intval($amount[$x]);
             }
-            $store_list = new store_list();
-            $store_list->insert($data);
+            $withdraw_list = new withdraw_list();
+            $withdraw_list->insert($data);
             //------------[ อัพเดท - parcel_detail ]--------------
             $parcel_list = cms::toArray("parcel_detail","id","balance");
             foreach($data_for_update as $id=>$val) {
-                $balance = $parcel_list[$id] + $val;
+                $balance = $parcel_list[$id] - $val;
                 DB::table('parcel_detail')->where('id', $id)->update([
                     "balance" => $balance,
                     "updated_at" => date("Y-m-d")
@@ -305,7 +327,7 @@ class backendController extends Controller
 
                 $data_for_log[] = [
                     "parcel_detail_id"=>$id,
-                    "amount"=>$val,
+                    "amount"=>(-1 * $val),
                     "created_at" => date("Y-m-d"),
                     "user_id" => Session::get('cid')
                 ];
@@ -313,8 +335,8 @@ class backendController extends Controller
             DB::table('parcel_log')->insert($data_for_log);
             //----------------------------------------------------
             return redirect()->route('parcel.history',[
-                "type"=>"in",
-                "id"=>$order_id
+                "type"=>"out",
+                "id"=>$withdraw_id
             ]);
         }catch (Exception $e) {
             return redirect()->back()->with(['Error'=>'บันทึกไม่สำเร็จ']);

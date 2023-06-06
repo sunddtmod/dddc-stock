@@ -109,24 +109,24 @@
               <div class="row bg-sky py-4 mt-4">
 
                 <div class="col-md-4">
-                  <label>(1) ผู้เบิกวัสดุ</label>
+                  <label>(1) ผู้เบิกวัสดุ</label><font color="red">*</font>
                   <div class="ms-2 p-2">
-                    <input type="text" class="form-control text-center" name="forerunner_name" placeholder="ชื่อ-สกุล">
-                    <input type="date" class="form-control text-center" name="forerunner_date"">
+                    <input type="text" class="form-control text-center" name="forerunner_name" placeholder="ชื่อ-สกุล" required>
+                    <input type="date" class="form-control text-center" name="forerunner_date" required>
                   </div>
                 </div>
                 <div class="col-md-4">
                   <label>(2) ผู้สั่งจ่าย</label>
                   <div class="ms-2 p-2">
                     <input type="text" class="form-control text-center" name="payer_name" placeholder="ชื่อ-สกุล">
-                    <input type="date" class="form-control text-center" name="payer_date"">
+                    <input type="date" class="form-control text-center" name="payer_date">
                   </div>
                 </div>
                 <div class="col-md-4">
                   <label>(3) หัวหน้ากลุ่ม</label>
                   <div class="ms-2 p-2">
                     <input type="text" class="form-control text-center" name="leader_name" placeholder="ชื่อ-สกุล">
-                    <input type="date" class="form-control text-center" name="leader_date"">
+                    <input type="date" class="form-control text-center" name="leader_date">
                   </div>
                 </div>
 
@@ -134,21 +134,21 @@
                   <label>(4) หัวหน้าเจ้าหน้าที่พัสดุ</label>
                   <div class="ms-2 p-2">
                     <input type="text" class="form-control text-center" name="parcel_officer_name" placeholder="ชื่อ-สกุล" value="นางสาวปาณิสรา  เชาว์พ้อง">
-                    <input type="date" class="form-control text-center" name="parcel_officer_date"">
+                    <input type="date" class="form-control text-center" name="parcel_officer_date">
                   </div>
                 </div>
                 <div class="col-md-4">
                   <label>(5) ผู้รับของ</label>
                   <div class="ms-2 p-2">
                     <input type="text" class="form-control text-center" name="consignee_name" placeholder="ชื่อ-สกุล">
-                    <input type="date" class="form-control text-center" name="consignee_date"">
+                    <input type="date" class="form-control text-center" name="consignee_date">
                   </div>
                 </div>
                 <div class="col-md-4">
                   <label>(6) ผู้จ่ายวัสดุ</label>
                   <div class="ms-2 p-2">
-                    <input type="text" class="form-control text-center" name="material_payer_name" placeholder="ชื่อ-สกุล" value="{{ Session::get('user_name') }}">
-                    <input type="date" class="form-control text-center" name="material_payer_date"">
+                    <input type="text" class="form-control text-center" name="material_payer_name" placeholder="ชื่อ-สกุล" required value="{{ Session::get('user_name') }}">
+                    <input type="date" class="form-control text-center" name="material_payer_date" required value="{{date('Y-m-d')}}">
                   </div>
                 </div>
 
