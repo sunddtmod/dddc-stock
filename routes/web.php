@@ -21,12 +21,13 @@ Route::group(['middleware' => 'keycloak-web'], function () {
     Route::get('/logout', [back::class, 'logout'])->name('logout');
 
     //ลงทะเบียนวัสดุ
-        Route::get('/parcel/register', [back::class, 'parcelRegister'])->name('parcel.register');
+        Route::get('/parcel/register/{id?}', [back::class, 'parcelRegister'])->name('parcel.register');
         Route::post('/parcel/parcel_add', [back::class, 'parcel_add'])->name('parcel.add');
         Route::post('/parcel/parcel_update/{id?}', [back::class, 'parcel_update'])->name('parcel.update');
         Route::get('/parcel/parcel_delete/{id?}', [back::class, 'parcel_delete'])->name('parcel.delete');
         Route::get('/parcel_status/{id?}/{val?}', [back::class, 'parcel_status'])->name('parcel.status');
     //End
+    Route::get('/parcel/detail/{id?}', [back::class, 'parcelDetail'])->name('parcel.detail');
 
     Route::get('/parcel/in', [back::class, 'parcelIn'])->name('parcel.in');
     Route::post('/parcel/in_store', [back::class, 'parcelInStore'])->name('parcel.in.store');
@@ -34,7 +35,7 @@ Route::group(['middleware' => 'keycloak-web'], function () {
     Route::get('/parcel/out', [back::class, 'parcelOut'])->name('parcel.out');
     Route::post('/parcel/out_store', [back::class, 'parcelOutStore'])->name('parcel.out.store');
 
-    // Route::post('/parcel/list/{type?}/{id?}', [back::class, 'parcel_list'])->name('parcel.list');
+    Route::get('/parcel/list/{d1?}/{d2?}', [back::class, 'parcel_list'])->name('parcel.list');
 
     // report
         Route::get('/report/balance', [report::class, 'balance'])->name('report.balance');

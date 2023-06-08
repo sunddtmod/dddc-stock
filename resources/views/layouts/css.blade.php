@@ -36,6 +36,9 @@
     .cursor-pointer {
       cursor: pointer;
     }
+    .bg-sky {
+      background-color: aliceblue;
+    }
 
 
     #footer .footer-top .footer-info {

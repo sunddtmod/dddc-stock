@@ -22,13 +22,18 @@ class backendController extends Controller
     }
 
     //ลงทะเบียนวัสดุใหม่
-    public function parcelRegister() {
+    public function parcelRegister($id=0) {
         $query = DB::table("ref_parcel_group")->select("id","name")->where("status",1)->get();
         $group = cms::ObjArr($query);
         $area = cms::toArray("ref_area");
-        $data = DB::table("parcel_detail")->whereNull("deleted_at")->get();
+        $query = DB::table("parcel_detail")->whereNull("deleted_at");
+        if( $id>0 ) {
+            $query->where("parcel_id", $id);
+        }
+        $data = $query->get();
         
         return view('backend/parcel/register', [
+            "id"=>$id,
             "group"=>$group,
             "area"=>$area,
             "data"=>$data
@@ -154,6 +159,9 @@ class backendController extends Controller
         return response()->json(['msg'=>'Success'] );
     }
 
+    public function parcelDetail($id) {
+        
+    }
     
     //รับเข้า STORE
     public function parcelIn() {
@@ -212,16 +220,18 @@ class backendController extends Controller
                 $data_for_log[] = [
                     "parcel_detail_id"=>$id,
                     "amount"=>$val,
+                    "balance" => $balance,
                     "created_at" => date("Y-m-d"),
                     "user_id" => Session::get('cid')
                 ];
             }
             DB::table('parcel_log')->insert($data_for_log);
             //----------------------------------------------------
-            return redirect()->route('parcel.list',[
-                "type"=>"in",
-                "id"=>$order_id
-            ]);
+            // return redirect()->route('parcel.list',[
+            //     "type"=>"in",
+            //     "id"=>$order_id
+            // ]);
+            return redirect()->back()->with(['Success'=>'บันทึกสำเร็จ']);
         }catch (Exception $e) {
             return redirect()->back()->with(['Error'=>'บันทึกไม่สำเร็จ']);
         } 
@@ -240,7 +250,6 @@ class backendController extends Controller
         ]);
     }
     public function parcelOutStore(Request $request) {
-        dd($request);
         try {
             //--------------[ใบรายการ]-----------
             $withdraw = new withdraw();
@@ -328,27 +337,47 @@ class backendController extends Controller
                 $data_for_log[] = [
                     "parcel_detail_id"=>$id,
                     "amount"=>(-1 * $val),
+                    "balance" => $balance,
                     "created_at" => date("Y-m-d"),
                     "user_id" => Session::get('cid')
                 ];
             }
             DB::table('parcel_log')->insert($data_for_log);
             //----------------------------------------------------
-            return redirect()->route('parcel.history',[
-                "type"=>"out",
-                "id"=>$withdraw_id
-            ]);
+            // return redirect()->route('parcel.history',[
+            //     "type"=>"out",
+            //     "id"=>$withdraw_id
+            // ]);
+            return redirect()->back()->with(['Success'=>'บันทึกสำเร็จ']);
         }catch (Exception $e) {
+            dd($e);
             return redirect()->back()->with(['Error'=>'บันทึกไม่สำเร็จ']);
         } 
     }
 
 
-    public function parcel_list($type='out', $id=0) {
-        // $data = [];
-        // return view('backend/parcel/list', [
-        //     "data"=>$data
-        // ]);
+    public function parcel_list($d1='',$d2='') {
+        $d1 = ( $d1=='' ) ? date("Y-m")."-01" : $d1;
+        $d2 = ( $d2=='' ) ? date("Y-m-d") : $d2;
+        $data = DB::table("parcel_log")->whereBetween('created_at', [$d1, $d2])->get();
+
+        $temp = DB::table("parcel_detail")->whereNull("deleted_at")->get();
+        $parcel_detail = [];
+        foreach($temp as $x=>$item) {
+            $parcel_detail[$item->id] = [
+                "code" => $item->parcel_id.":".$item->code,
+                "name" => $item->name,
+                "unit" => $item->unit
+            ];
+        }
+
+        $parcel_store = cms::toArray("parcel_store", "parcel_detail_id", "price");
+
+        return view('backend/parcel/list', [
+            "data"=>$data,
+            "parcel_detail" => $parcel_detail,
+            "parcel_store" => $parcel_store
+        ]);
     }
 
     

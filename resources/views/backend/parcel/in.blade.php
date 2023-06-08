@@ -24,9 +24,7 @@
         content: ' \2611';
         margin-right: 5px;
     }
-    .bg-sky {
-      background-color: aliceblue;
-    }
+    
 </style>
 @endsection
 

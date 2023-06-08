@@ -56,22 +56,25 @@
                   }else{
                     $src=asset('assets/parcel')."/".$item->pic;
                   }
-                  ?>
 
-                  <div class="col-md-2 portfolio-item filter-app">
+                  // |00000000|000|
+                  // ID => |หมวด|รหัสของ|
+                  $gen_code = $item->parcel_id.$item->code;
+                  ?>
+                  <div class="col-xl-3 col-md-4 col-sm-6 portfolio-item filter-app">
                     <div class="portfolio-wrap bg-white">
                       <span class="cricle-img"><img src="{{$src}}" class="img-fluid" alt=""></span>
                       <div class="portfolio-links">
                         <a href="{{$src}}" data-gallery="portfolioGallery" class="portfolio-lightbox" 
-                        title="{{ $item->parcel_id }}0{{ $item->code }}<br>{{ $item->name }}"><i class="bi bi-plus"></i></a>
+                        title="{{ $gen_code }}<br>{{ $item->name }}">
+                        
+                        <i class="bi bi-plus fs-1" onclick="fn_goto('{{$item->id}}')"></i>
+                      
+                        </a>
                       </div>
                       <div align="center">
                         <h4>{{ number_format($item->balance) }} {{$item->unit}}</h4>
-                          <?php
-                          // |00000000|000|
-                          // ID => |หมวด|รหัสของ|
-                          $gen_code = $item->parcel_id.$item->code;
-                          ?>
+                          
                           <svg class="barcode"
                             jsbarcode-format="upc"
                             jsbarcode-height="40"
@@ -113,5 +116,10 @@
   $( document ).ready(function() {
     JsBarcode(".barcode").init();
   });
+
+
+  function fn_goto(id) {
+    window.location.href = "{{ Route('parcel.detail') }}"+"/"+id;
+  }
 </script>
 @endsection

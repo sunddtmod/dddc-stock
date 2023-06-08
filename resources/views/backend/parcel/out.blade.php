@@ -112,7 +112,7 @@
                   <label>(1) ผู้เบิกวัสดุ</label><font color="red">*</font>
                   <div class="ms-2 p-2">
                     <input type="text" class="form-control text-center" name="forerunner_name" placeholder="ชื่อ-สกุล" required>
-                    <input type="date" class="form-control text-center" name="forerunner_date" required>
+                    <input type="date" class="form-control text-center" name="forerunner_date" required value="{{date('Y-m-d')}}">
                   </div>
                 </div>
                 <div class="col-md-4">

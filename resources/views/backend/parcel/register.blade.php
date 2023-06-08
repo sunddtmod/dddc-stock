@@ -36,10 +36,10 @@
                 <div class="col-md-4" align="right">
                     <div class="input-group mb-2">
                     <span class="input-group-text">หมวด</span>
-                    <select class="form-select" id="group">
-                        <option value="99999999">ทั้งหมด</option>
-                        @foreach($group as $id=>$name)
-                        <option value="{{$id}}">{{$name}}</option>
+                    <select class="form-select" id="group" onchange="fn_group(this)">
+                        <option value="0">ทั้งหมด</option>
+                        @foreach($group as $x=>$name)
+                        <option value="{{$x}}" <?=( ($x==$id)?"selected":"" )?>>{{$name}}</option>
                         @endforeach
                     </select>
                     </div>
@@ -250,6 +250,11 @@ $(function() {
   function auto_txt() {
     // let code= $("#parcel_id").val();
     // $("#code").val(code);
+  }
+
+  function fn_group(that) {
+    let id = $(that).val();
+    window.location.href = "{{ Route('parcel.register') }}"+"/"+id;
   }
 
   function popup_add() {
