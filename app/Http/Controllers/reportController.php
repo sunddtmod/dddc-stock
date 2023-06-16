@@ -43,9 +43,11 @@ class reportController extends Controller
         }
 
         $parcel_store = DB::table("parcel_store")->where("id", $id)->get();
+        $sum_price = 0;
         foreach($parcel_store as $item) {
             $id = $item->id;
-            $parcel = $parcel_detail[$id];
+            $parcel = $parcel_detail[$item->parcel_detail_id];
+            $sum_price += ($item->price * $item->amount);
 
             $data[] = [
                 "id" => $id,
@@ -57,7 +59,10 @@ class reportController extends Controller
                 "sum" => number_format($item->price * $item->amount, 2)
             ];
         }
-        return response()->json(['data'=>json_encode($data, JSON_UNESCAPED_UNICODE)]);
+        return response()->json([
+            'data'=>json_encode($data, JSON_UNESCAPED_UNICODE),
+            'sum_price'=>number_format($sum_price, 2),
+        ]);
     }
     
     public function parcel_out($fyear='') {
@@ -65,7 +70,7 @@ class reportController extends Controller
         $nowyear = date("Y",strtotime("+3 month",strtotime(date('Y-m-d')))) + 543;
         $curryear = ( $fyear=='' ) ? $nowyear : $fyear;
 
-        $data = DB::table("parcel_store_order")->where('fyear', $curryear)->get();
+        $data = DB::table("withdraw")->where('fyear', $curryear)->get();
 
         return view('backend/report/parcel_out', [
             "oldyear" => $oldyear,
@@ -73,6 +78,52 @@ class reportController extends Controller
             "curryear" => $curryear,
 
             "data"=>$data
+        ]);
+    }
+    public function parcel_out_ajax($id=0) {
+        $data = [];
+
+        $temp = DB::table("parcel_detail")->whereNull("deleted_at")->get();
+        $parcel_detail = [];
+        foreach($temp as $x=>$item) {
+            $parcel_detail[$item->id] = [
+                "parcel_id" => $item->parcel_id,
+                "code" => $item->code,
+                "name" => $item->name,
+                "unit" => $item->unit
+            ];
+        }
+        $withdraw_list = DB::table("withdraw_list")->where("id", $id)->get();
+        $sum_price = 0;
+        foreach($withdraw_list as $item) {
+            $id = $item->id;
+            $parcel = $parcel_detail[$item->parcel_detail_id];
+            $sum_price += ($item->price * $item->amount);
+
+            $data[] = [
+                "id" => $id,
+                "code" => $parcel['parcel_id'].":".$parcel['code'],
+                "name" => $parcel['name'],
+                "unit" => $parcel['unit'],
+                "amount" => $item->amount,
+                "price" => number_format($item->price, 2),
+                "sum" => number_format($item->price * $item->amount, 2)
+            ];
+
+
+            <th>id</th>
+            <th style="width: 60px;">รหัส</th>
+            <th>ชื่อวัสดุ</th>
+            <th style="width: 90px;">เบิก</th>
+            <th style="width: 60px;">หน่วย</th>
+            <th style="width: 90px;">ราคา (บาท)</th>
+            <th style="width: 90px;">รวม (บาท)</th>
+
+
+        }
+        return response()->json([
+            'data'=>json_encode($data, JSON_UNESCAPED_UNICODE),
+            'sum_price'=>number_format($sum_price, 2),
         ]);
     }
 

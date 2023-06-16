@@ -7,7 +7,6 @@ use App\CmsHelper as cms;
 <link rel="stylesheet" href="{{ asset('assets/js/dataTables/css/dataTables.bootstrap5.min.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/js/dataTables/css/buttons.dataTables.min.css') }}">
 <style>
-  <style>
   .cricle-img {
     border: 6px solid rgba(0, 0, 0, 0.15);
     margin: 0px auto;

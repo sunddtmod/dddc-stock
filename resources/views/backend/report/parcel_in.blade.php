@@ -56,12 +56,19 @@ $curr_id = 0;
             $curr_id = $item->id;
           }
           ?>
-          <option value="{{$item->id}}" {{$sel}}>[{{ cms::DateThai($item->purchase_date, 'Y-m-d') }}]-{{$item->order_number}}</option>
+          <option value="{{$item->id}}" {{$sel}} 
+                  data-date="{{ cms::DateThai($item->purchase_date, 'd-M-Y')  }}" 
+                  data-number="{{ $item->order_number }}">
+          [{{ cms::DateThai($item->purchase_date, 'Y-m-d') }}]-{{$item->order_number}}
+          </option>
           @endforeach
           </select>
         </div>
         <div class="col-md-9">
-
+          <div class="row mb-2">
+            <div class="col-6" align="left">เลขที่ใบสั่งซื้อ : <span id="list_num"></span></div>
+            <div class="col-6" align="right">วันที่ <span id="list_date"></span></div>
+          </div>
           <div class="table-responsive">
             <table id="myTable" class="table table-bordered table-sm">
                 <thead class="bg-dark text-white">
@@ -82,7 +89,7 @@ $curr_id = 0;
                   <tr class="bg-sky">
                     <td></td><td></td><td></td><td></td><td></td>
                     <td><div align="right">รวม</div></td>
-                    <td></td>
+                    <td id="sum_price"></td>
                   </tr>
                 </tfoot>
             </table>
@@ -161,14 +168,26 @@ $(function() {
         }
     }
   }
+  function AddItem(text, value) {
+      var opt = document.createElement("option");
+      opt.text = text;
+      opt.value = value;
+      ddl.options.add(opt);
+    }
 
   function fn_sel_list() {
     let id = $("#list_sel").val();
     ajax_tb(id);
   }
   function ajax_tb(id) {
+    let n = $("#list_sel option:selected").attr("data-number");
+    let d = $("#list_sel option:selected").attr("data-date");
+    $("#list_num").text(n);
+    $("#list_date").text(d);
+
     let store_id = parseInt(id);
     tb.clear().draw();
+
     $.ajax({
       url: "{{route('report.in.ajax')}}"+"/"+store_id,
       success:function(response){
@@ -188,6 +207,7 @@ $(function() {
               tb.row.add(data_row).draw();
             }
             //-------------------------
+            $("#sum_price").html("<div align='right'>"+response['sum_price']+"</div>");
           }
         }
       },

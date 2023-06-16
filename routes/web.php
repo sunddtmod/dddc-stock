@@ -47,6 +47,8 @@ Route::group(['middleware' => 'keycloak-web'], function () {
         Route::get('/report_in_ajax/{id?}', [report::class, 'parcel_in_ajax'])->name('report.in.ajax');
 
         Route::get('/report_out/{fyear?}', [report::class, 'parcel_out'])->name('report.out');
+        Route::get('/report_out_ajax/{id?}', [report::class, 'parcel_out_ajax'])->name('report.out.ajax');
+
         Route::get('/report_date/{d1?}/{d2?}', [report::class, 'parcel_date'])->name('report.date');
         Route::get('/report_person/{name?}', [report::class, 'parcel_person'])->name('report.person');
         Route::get('/report_one/{parcel_id?}', [report::class, 'parcel_one'])->name('report.one');

@@ -71,7 +71,7 @@
 
                 <div class="row p-2">
                     <div class="col-md-8">
-                    <h5>ใบจัดซื้อวัสดุ</h5>
+                    <h5>ใบเบิกวัสดุ</h5>
                     </div>
                     <div class="col-md-4">
                       <div class="input-group">
@@ -285,7 +285,10 @@ $(function() {
   function add_row(id) {
     for (const [key, value] of Object.entries(obj_data)) {
         if( id==value['id'] ) {
-            let code = "<input type='hidden' name=parcel_detail_id[] value='"+value['id']+"'>" + value['parcel_id'] +":"+ value['code'];
+            let code = "<input type='hidden' name=parcel_detail_id[] value='"+value['id']+"'>" 
+                      // + "<input type='hidden' name=store_id[] value='"+value['store_id']+"'>" 
+                      + value['parcel_id'] +":"+ value['code'];
+                      
             let btn = "<button type='button' class='btn btn-sm btn-danger' title='ลบ' onclick='del_row("+id+")' id='btn"+id+"'>"
             + "<i class='bi bi-trash3'></i></button>";
 

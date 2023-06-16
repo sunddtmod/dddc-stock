@@ -47,7 +47,7 @@ class CmsHelper
             $strYear = substr($strYear,2,2);
             return "$strDay $strMonthThai $strYear";
         } elseif ($type == 'Y-m-d') {
-            return $strYear."-". str_pad($strMonth,2,"0") ."-". str_pad($strDay,2,"0");
+            return $strYear."-". str_pad($strMonth,2,"0",STR_PAD_LEFT) ."-". str_pad($strDay,2,"0",STR_PAD_LEFT);
         } elseif ($type == 'd-m-Y') {
             $strMonthThai = $strMonthNick[$strMonth];
             return "$strDay $strMonthThai $strYear";
