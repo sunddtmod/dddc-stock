@@ -119,7 +119,7 @@
 
 
   function fn_goto(id) {
-    window.location.href = "{{ Route('parcel.detail') }}"+"/"+id;
+    window.location.href = "{{ Route('report.one') }}"+"/"+id;
   }
 </script>
 @endsection

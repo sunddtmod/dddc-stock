@@ -16,8 +16,13 @@ use App\Http\Controllers\ajaxController as ajax;
 | contains the "web" middleware group. Now create something great!
 |
 */
+Route::get('/', function () {
+    return redirect('/home');
+});
+Route::get('/home/{key?}', [front::class, 'home'])->name('home');
+
 Route::group(['middleware' => 'keycloak-web'], function () {
-    Route::get('/{key?}', [front::class, 'home'])->name('home');
+    // Route::get('/{key?}', [front::class, 'home'])->name('home');
     Route::get('/logout', [back::class, 'logout'])->name('logout');
 
     //ลงทะเบียนวัสดุ
@@ -35,10 +40,18 @@ Route::group(['middleware' => 'keycloak-web'], function () {
     Route::get('/parcel/out', [back::class, 'parcelOut'])->name('parcel.out');
     Route::post('/parcel/out_store', [back::class, 'parcelOutStore'])->name('parcel.out.store');
 
-    Route::get('/parcel/list/{d1?}/{d2?}', [back::class, 'parcel_list'])->name('parcel.list');
+   
 
     // report
-        Route::get('/report/balance', [report::class, 'balance'])->name('report.balance');
+        Route::get('/report_in/{fyear?}', [report::class, 'parcel_in'])->name('report.in');
+        Route::get('/report_in_ajax/{id?}', [report::class, 'parcel_in_ajax'])->name('report.in.ajax');
+
+        Route::get('/report_out/{fyear?}', [report::class, 'parcel_out'])->name('report.out');
+        Route::get('/report_date/{d1?}/{d2?}', [report::class, 'parcel_date'])->name('report.date');
+        Route::get('/report_person/{name?}', [report::class, 'parcel_person'])->name('report.person');
+        Route::get('/report_one/{parcel_id?}', [report::class, 'parcel_one'])->name('report.one');
+
+        Route::get('/report_balance', [report::class, 'balance'])->name('report.balance');
     //End
 
     // setting

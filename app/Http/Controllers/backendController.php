@@ -16,11 +16,7 @@ use App\Models\withdraw_list;
 
 class backendController extends Controller
 {
-    public function logout() {
-        session()->forget('role');
-        return redirect()->route('keycloak.logout');
-    }
-
+    
     //ลงทะเบียนวัสดุใหม่
     public function parcelRegister($id=0) {
         $query = DB::table("ref_parcel_group")->select("id","name")->where("status",1)->get();
@@ -354,31 +350,4 @@ class backendController extends Controller
             return redirect()->back()->with(['Error'=>'บันทึกไม่สำเร็จ']);
         } 
     }
-
-
-    public function parcel_list($d1='',$d2='') {
-        $d1 = ( $d1=='' ) ? date("Y-m")."-01" : $d1;
-        $d2 = ( $d2=='' ) ? date("Y-m-d") : $d2;
-        $data = DB::table("parcel_log")->whereBetween('created_at', [$d1, $d2])->get();
-
-        $temp = DB::table("parcel_detail")->whereNull("deleted_at")->get();
-        $parcel_detail = [];
-        foreach($temp as $x=>$item) {
-            $parcel_detail[$item->id] = [
-                "code" => $item->parcel_id.":".$item->code,
-                "name" => $item->name,
-                "unit" => $item->unit
-            ];
-        }
-
-        $parcel_store = cms::toArray("parcel_store", "parcel_detail_id", "price");
-
-        return view('backend/parcel/list', [
-            "data"=>$data,
-            "parcel_detail" => $parcel_detail,
-            "parcel_store" => $parcel_store
-        ]);
-    }
-
-    
 }

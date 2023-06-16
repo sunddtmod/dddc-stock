@@ -4,8 +4,8 @@ use App\CmsHelper as cms;
 @extends('layouts.master')
 
 @section('css')
-<link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap5.min.css">
-
+<link rel="stylesheet" href="{{ asset('assets/js/dataTables/css/dataTables.bootstrap5.min.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/js/dataTables/css/buttons.dataTables.min.css') }}">
 <style>
     th {
         text-align: center !important;
@@ -23,7 +23,7 @@ use App\CmsHelper as cms;
 
   <div class="section-bg" data-aos="fade-left">
     <div class="row">
-      <div class="col-md-5"><h3 class="ps-3">ประวัติการ รับเข้า-จ่ายออก</h3></div>
+      <div class="col-md-5"><h3 class="ps-3">รับเข้า-จ่ายออก ตามช่วงเวลา</h3></div>
       <div class="col-md-3">
         <div class="input-group">
         <span class="input-group-text bg-dark text-white">เริ่ม</span>
@@ -48,6 +48,7 @@ use App\CmsHelper as cms;
         <table id="myTable" class="table table-bordered table-sm">
             <thead class="bg-dark text-white">
                 <tr>
+                <th>id</th>
                 <th>วันที่</th>
                 <th>รหัส</th>
                 <th>ชื่อวัสดุ</th>
@@ -85,6 +86,7 @@ use App\CmsHelper as cms;
                     }
                 ?>
                 <tr>
+                <td>{{ $item->id }}</td>
                 <td style="width: 90px;">{{ cms::DateThai($item->created_at) }}</td>
                 <td>{{ $parcel_detail[$item->parcel_detail_id]['code'] }}</td>
                 <td>{{ $parcel_detail[$item->parcel_detail_id]['name'] }}</td>
@@ -99,7 +101,7 @@ use App\CmsHelper as cms;
             </tbody>
             <tfoot>
                 <tr class="bg-sky">
-                    <td></td><td></td><td></td><td></td><td></td><td></td>
+                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
                     <td><div align="right">รวม</div></td>
                     <td><div align="right">{!! number_format($in_sum,2) !!}</div></td>
                     <td><div align="right">{!! "<span class='text-danger'>".number_format($out_sum,2)."</span>" !!}</div></td>
@@ -119,8 +121,19 @@ use App\CmsHelper as cms;
 
 @section('js')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
 <script src="{{asset('assets/js/dataTables/jquery.dataTables.min.js')}}"></script>
 <script src="{{asset('assets/js/dataTables/dataTables.bootstrap5.min.js')}}"></script>
+<script src="{{asset('assets/js/dataTables/dataTables.buttons.min.js')}}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
+
+
+
+
+
+
+
 
 <script>
 var obj_data = <?=json_encode($data, JSON_UNESCAPED_UNICODE)?>;
@@ -129,14 +142,23 @@ var tb;
 var counter = 0;
 
 $(function() {
-    tb = $("#myTable").DataTable({
+    $("#myTable").DataTable({
       "language": {
             "lengthMenu": "แสดง _MENU_ ข้อมูล/หน้า",
             "zeroRecords": "ไม่มีข้อมูล",
             "info": "หน้า _PAGE_ / _PAGES_",
             "infoEmpty": "",
             "infoFiltered": "(กรองจากข้อมูลทั้งหมด _MAX_ )"
-        }
+        },
+        pageLength : 20,
+        "ordering": false,
+        columnDefs: [
+          {
+              target: 0,
+              visible: false,
+          },
+        ],
+        dom: 'Bfrtip',"buttons": ["excel"]
     });
   });
 
@@ -147,7 +169,7 @@ $(function() {
   function search() {
     let d1 = $("#start_date").val();
     let d2 = $("#end_date").val();
-    window.location.href = "{{ Route('parcel.list') }}"+"/"+d1+"/"+d2;
+    window.location.href = "{{ Route('report.date') }}"+"/"+d1+"/"+d2;
   }
 </script>
 @endsection

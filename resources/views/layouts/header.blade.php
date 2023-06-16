@@ -16,7 +16,6 @@
               <li><a href="{{ Route('parcel.in') }}">รับเข้า</a></li>
               <li><a href="{{ Route('parcel.out') }}">จ่ายออก</a></li>
               <li><a href="{{ Route('parcel.register') }}">ลงทะเบียนวัสดุใหม่</a></li>
-              <li><a href="{{ Route('parcel.list') }}">ประวัติการ รับเข้า-จ่ายออก</a></li>
             </ul>
           </li>
           @endcan
@@ -25,6 +24,11 @@
           <li class="dropdown {{ Active::checkRoute('report.*') }}"><a href="#"><span>รายงาน</span> <i class="bi bi-chevron-down"></i></a>
             <ul>
               <li><a href="{{ Route('report.balance') }}">รายงานวัสดุคงเหลือ</a></li>
+              <li><a href="{{ Route('report.in') }}">รายงานรับเข้า</a></li>
+              <li><a href="{{ Route('report.out') }}">รายงานจ่ายออก</a></li>
+              <li><a href="{{ Route('report.date') }}">ประวัติทำรายการ-วันที่</a></li>
+              <li><a href="{{ Route('report.person') }}">ประวัติทำรายการ-บุคคล</a></li>
+              <li><a href="{{ Route('report.one') }}">ประวัติทำรายการ-วัสดุ</a></li>
             </ul>
           </li>
           @endcan
@@ -40,11 +44,17 @@
           </li>
           @endcan
           
+          @if( !empty(Auth::user()) )
           <li class="dropdown {{ Active::checkRoute('user.*') }}"><a href="#"><span>{{ (Auth::user()->name) }}</span> <i class="bi bi-chevron-down"></i></a>
             <ul>
-              <li><a href="{{route('logout')}}">ออกจากระบบ</a></li>
+              <li><a href="{{route('keycloak.logout')}}">ออกจากระบบ</a></li>
             </ul>
           </li>
+          @else
+          <ul>
+              <li><a href="{{route('keycloak.login')}}">login</a></li>
+          </ul>
+          @endif
 
         </ul>
         <i class="bi bi-list mobile-nav-toggle"></i>
